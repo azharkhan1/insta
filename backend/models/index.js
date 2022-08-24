@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { DBURI } = require("../config");
-const user = require("./user");
+const User = require("./user");
 console.log("db uri is=>", DBURI);
 mongoose.connect(DBURI, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -30,5 +30,5 @@ process.on("SIGINT", () => {
 });
 
 module.exports = {
-  user,
+  User,
 };
