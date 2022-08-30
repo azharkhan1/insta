@@ -1,5 +1,5 @@
 const { User } = require("../models");
-const { hash } = require("../utils/index");
+const { hash, convertHashToString, jwtToken } = require("../utils/index");
 
 const signup = async (req, res, next) => {
   try {
@@ -39,6 +39,61 @@ const signup = async (req, res, next) => {
   }
 };
 
+const signin = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json(`
+        Please send following in json body: i.e
+        password
+        email
+      `);
+    }
+
+    const user = await User.findOne({
+      email,
+    });
+    if (!user) {
+      return res.status(404).send({
+        error: "User email or password does not matchh",
+      });
+    }
+
+    const hashToStringPass = await convertHashToString(user.password, password);
+
+    if (hashToStringPass) {
+      const token = jwtToken(user);
+      return res.status(200).send({
+        message: "Signed in successfully",
+        user,
+        token,
+      });
+    }
+
+    return res.status(400).send({
+      error: "User email or password does not match",
+    });
+  } catch (err) {
+    console.log("err", err);
+    res.status(400).send({
+      error: "Something went wrong",
+    });
+  }
+};
+
+const profile = async (req, res) => {
+  try {
+    return res.send({ message: "usser gotten successfully", user: req.user });
+  } catch (err) {
+    console.log("err", err);
+    res.status(400).send({
+      error: "Something went wrong",
+    });
+  }
+};
+
 module.exports = {
   signup,
+  signin,
+  profile,
 };
